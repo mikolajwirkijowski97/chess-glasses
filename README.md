@@ -1,2 +1,2 @@
 # chess-glasses
-Extended visualization of the current board state on chess.com 
+## A chrome extensions implementing intuitive visualization of the current board state on chess.com and maybe other websistes
