@@ -16,7 +16,13 @@
         }
     },
     "content_scripts": [{
-        "matches": ["https://www.chess.com/*"]
-    }]
+        "matches": ["https://www.chess.com/*"],
+        "js": ["main.js"]
+    }],
+
+    "web_accessible_resources": [
+        "/colors.js",
+        "/pieces.js"
+      ]
 
 }
