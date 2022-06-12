@@ -5,3 +5,5 @@
 ![alt text](https://i.ibb.co/CvTHcTn/Board-Save.png))
 
 ## In the next update pin-detection and king safety mating helper will be added
+
+### I do not condone cheating, the helper is meant to help beginners during offline play or against friends who know beforehand that the game is tool assisted.
