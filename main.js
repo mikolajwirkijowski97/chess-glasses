@@ -1,17 +1,23 @@
 // piece enum
 const Pieces = {
-    WPawn: 1,
+    //Pawns
+    WPawn: 0,
+    BPawn: 1,
+    //Knights
     WKnight: 2,
-    WBishop: 3,
-    WRook: 4,
-    WQueen: 5,
-    WKing: 6,
-    BPawn: 7,
-    BKnight: 8,
-    BBishop: 9,
-    BRook: 10,
-    BQueen: 11,
-    BKing: 12
+    BKnight: 3,
+    //Bishops
+    WBishop: 4,
+    BBishop: 5,
+    //Rooks
+    WRook: 6,
+    BRook: 7,
+    //Queens
+    WQueen: 8,
+    BQueen: 9,
+    //Kings
+    WKing: 10,
+    BKing: 11
 }
 
 // define color strings
@@ -66,6 +72,37 @@ function classToPiece(pieceClass){
             return Pieces.BKing;
     }
 }
+
+function getDirections(pieceType){
+    switch(pieceType){
+        case Pieces.WPawn:
+            return[[1,1],[1,-1]];
+        case Pieces.BPawn:
+            return[[-1,1],[-1,-1]];
+        case Pieces.WRook:
+            return[[1,0],[0,1],[-1,0],[0,-1]];
+        case Pieces.BRook:
+            return[[-1,0],[0,-1],[1,0],[0,1]];
+        case Pieces.WKnight:
+            return[[2,1],[2,-1],[-2,1],[-2,-1],[1,2],[1,-2],[-1,2],[-1,-2]];
+        case Pieces.BKnight:
+            return[[-2,1],[-2,-1],[2,1],[2,-1],[-1,2],[-1,-2],[1,2],[1,-2]];
+        case Pieces.WBishop:
+            return[[1,1],[-1,1],[1,-1],[-1,-1]];
+        case Pieces.BBishop:
+            return [[-1,1],[1,-1],[1,1],[-1,-1]];
+        case Pieces.WQueen:
+            return [[1,0],[0,1],[-1,0],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]];
+        case Pieces.BQueen:
+            return [[-1,0],[0,-1],[1,0],[0,1],[-1,-1],[-1,1],[1,-1],[1,1]];
+        case Pieces.WKing:
+            return [[1,0],[0,1],[-1,0],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]];
+        case Pieces.BKing:
+            return [[-1,0],[0,-1],[1,0],[0,1],[-1,-1],[-1,1],[1,-1],[1,1]];
+    }
+}
+
+            
 function updateBoardState(board, boardState){
     clearBoard(boardState);
     pieces = document.getElementsByClassName("piece");
@@ -81,8 +118,18 @@ function updateBoardState(board, boardState){
 
 }
 
-// MAIN LOGIC STARTS HERE
+function attackSquares(boardState,attackedSquares,piece,row,column){
+    var pieceType = boardState[row][column];
+    var pieceColor = pieceType % 2;
+    var directions
+}
 
+function isOccupied(boardState, row, column){
+    return boardState[row][column] != null;
+}
+
+
+// MAIN LOGIC STARTS HERE
 // get the main board element
 var board = document.getElementsByClassName("board");
 // board state is contained in this variable, 
@@ -90,4 +137,11 @@ var boardState = new Array(8);
 for(var i=0;i<boardState.length;i++){
     boardState[i] = new Array(8);
 }
-updateBoardState(board, boardState);
+// attacked squares are contained in this variable
+var attackedSquares = new Array(8);
+for(var i=0;i<attackedSquares.length;i++){
+    attackedSquares[i] = new Array(8);
+}
+
+setInterval(function(){updateBoardState(board,boardState)},250);
+
