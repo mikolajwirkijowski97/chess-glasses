@@ -4,6 +4,7 @@
 ## Aiming to Perform 0-depth visualization of what's happening on the board by reading it from the website into an array
 ![alt text](https://i.ibb.co/CvTHcTn/Board-Save.png))
 
+## Roadmap
  * [x] King safety/mating visualization
  * [ ] Fix pawn/rook visualization bugs
  * [ ] Pin visualization
