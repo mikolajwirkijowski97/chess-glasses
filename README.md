@@ -14,4 +14,4 @@
 
 
 
-### I do not condone cheating, the helper is meant to help beginners during offline play or against friends who know beforehand that the game is tool assisted.
+## I do not condone cheating, the helper is meant to help beginners during offline play or against friends who know beforehand that the game is tool assisted.
