@@ -40,22 +40,22 @@ function createHighlightSquare(color, row, column, AddElements){
     return highlightsq;
 }
 
-function clearBoard(boardState, attackedStateWhite, attackedStateBlack){
-    for(var x=0;x<boardState.length;x++){
-        for(var y=0; y< boardState[x].length; y++){
-            boardState[x][y] = null;
+function clearBoard(Logic){
+    for(var x=0;x<Logic["boardState"].length;x++){
+        for(var y=0; y< Logic["boardState"][x].length; y++){
+            Logic["boardState"][x][y] = null;
         }
     }
 
-    for(var x=0;x<attackedStateWhite.length;x++){
-        for(var y=0; y< attackedStateWhite[x].length; y++){
-            attackedStateWhite[x][y] = false;
+    for(var x=0;x<Logic["attackedStateWhite"].length;x++){
+        for(var y=0; y< Logic["attackedStateWhite"].length; y++){
+            Logic["attackedStateWhite"][x][y] = false;
         }
     }
 
-    for(var x=0;x<attackedStateBlack.length;x++){
-        for(var y=0; y< attackedStateBlack[x].length; y++){
-            attackedStateBlack[x][y] = false;
+    for(var x=0;x<Logic["attackedStateBlack"].length;x++){
+        for(var y=0; y< Logic["attackedStateBlack"][x].length; y++){
+            Logic["attackedStateBlack"][x][y] = false;
         }
     }
 
@@ -93,8 +93,8 @@ function classToPiece(pieceClass){
             return Pieces.BKing;
     }
 }
-function updateBoardState(boardState,attackedStateWhite,attackedStateBlack){
-    clearBoard(boardState,attackedStateWhite,attackedStateBlack);
+function updateBoardState(Logic){
+    clearBoard(Logic);
 
     pieces = document.getElementsByClassName("piece");
     var squareXY = "";
@@ -111,13 +111,12 @@ function updateBoardState(boardState,attackedStateWhite,attackedStateBlack){
 
             }
             else{
-               
                 pieceType = classToPiece(pieceClassList.item(classItem_ix));
             }
         }
 
         try{
-            boardState[parseInt(squareXY[0])-1][parseInt(squareXY[1])-1] = pieceType
+            Logic["boardState"][parseInt(squareXY[0])-1][parseInt(squareXY[1])-1] = pieceType
         }
         catch(err){
             console.log(err);
@@ -125,7 +124,7 @@ function updateBoardState(boardState,attackedStateWhite,attackedStateBlack){
         
     }
     
-    if(VERBOSE)console.table(boardState);
+    if(VERBOSE)console.table(Logic["boardState"]);
 }
 
 function getPieceAttackDirections(piece){
@@ -157,14 +156,14 @@ function getPieceAttackDirections(piece){
     }
 }
 
-function markSquare(column,row,attackedStateWhite,attackedStateBlack, isWhite){
-    if(column >= 0 && column < 8 && row >= 0 && row < 8){
+function markSquare(column, row, isWhite, Logic){
+    if(isInBounds(column,row)){
         if(isWhite){
-            attackedStateWhite[column][row] = true;
+            Logic["attackedStateWhite"][column][row] = true;
         }
         else
         {
-            attackedStateBlack[column][row] = true;
+            Logic["attackedStateBlack"][column][row] = true;
         }
         
     }
@@ -179,7 +178,8 @@ function isSingleMovePiece(piece){
     || piece == Pieces.WKnight || piece == Pieces.BKnight || piece == Pieces.WKing || piece == Pieces.BKing;
 }
 
-function attackSquares(piece,column,row,boardState, attackedStateWhite,attackedStateBlack){
+function attackSquares(piece,column,row,Logic){
+    var piece = Logic["boardState"][column][row]; 
     var attackDirections = getPieceAttackDirections(piece);
     var isWhite = piece%2 == 0;
 
@@ -188,10 +188,13 @@ function attackSquares(piece,column,row,boardState, attackedStateWhite,attackedS
         var attackRow = row + attackDirections[i][1];
 
         while(true){
-            if(attackColumn >= 0 && attackColumn < 8 && attackRow >= 0 && attackRow < 8){
-                markSquare(attackColumn,attackRow,attackedStateWhite,attackedStateBlack,isWhite);
-                // if the square is non-empty OR its a single move piece, break the loop.
-                if(boardState[attackColumn][attackRow] != null || isSingleMovePiece(piece)){
+            if(isInBounds(attackColumn,attackRow)){
+                markSquare(attackColumn, attackRow, isWhite, Logic);
+                
+                // if the square is non-empty(king excluded) OR its a single move piece, break the loop.
+                const isKing = Logic["boardState"][attackColumn][attackRow] == Pieces.WKing || Logic["boardState"][attackColumn][attackRow] == Pieces.BKing;
+                const isEmpty = Logic["boardState"][attackColumn][attackRow] == null;
+                if( (!isEmpty && !isKing) || isSingleMovePiece(piece)){
                     break;
                 }
                 attackColumn += attackDirections[i][0];
@@ -203,53 +206,56 @@ function attackSquares(piece,column,row,boardState, attackedStateWhite,attackedS
     
 }
 
-function updateAttackState(boardState, attackedStateWhite, attackedStateBlack){
-    for(var x=0;x<boardState.length;x++){
-        for(var y=0; y< boardState[x].length; y++){
-            if(boardState[x][y] != null){
-                attackSquares(boardState[x][y],x,y,boardState,attackedStateWhite,attackedStateBlack);
+function updateAttackState(Logic){
+    for(var x=0;x<Logic["boardState"].length;x++){
+        for(var y=0; y< Logic["boardState"][x].length; y++){
+            if(Logic["boardState"][x][y] != null){
+                attackSquares(Logic["boardState"][x][y],x,y,Logic);
             }
         }
     }
 }
 
-function highlightAttackedSquaresAroundKing(board, boardState, attackedStateWhite,attackedStateBlack){
-    var whiteKingPosition = Array(2);
-    var blackKingPosition = Array(2);
+function getKingPosition(Logic,isWhite){
+    var kingPos = Array(2);
+    for(var x=0;x<Logic["boardState"].length;x++){
+        for(var y=0; y< Logic["boardState"][x].length; y++){
+            if(Logic["boardState"][x][y] == Pieces.WKing && isWhite){
+                kingPos[0] = x;
+                kingPos[1] = y;
+                return kingPos;
+            }
+            if(Logic["boardState"][x][y] == Pieces.BKing && !isWhite){
+                kingPos[0] = x;
+                kingPos[1] = y;
+                return kingPos;
+            }
+        }
+    }
+}
+
+function highlightAttackedSquaresAroundKing(Logic){
+    var whiteKingPosition = getKingPosition(Logic, true);
+    var blackKingPosition = getKingPosition(Logic, false);
     if(VERBOSE) console.log("Highlighting king squares");
 
-    for(var x=0;x<boardState.length;x++){
-        for(var y=0; y< boardState[x].length; y++){
-            if(boardState[x][y] == Pieces.WKing){
-                whiteKingPosition[0] = x;
-                whiteKingPosition[1] = y;
-            }
-            if(boardState[x][y] == Pieces.BKing){
-                blackKingPosition[0] = x;
-                blackKingPosition[1] = y;
-        }
-    }
-    }
+    // mark sq around white king
+    markSquaresAroundKing(whiteKingPosition[0], whiteKingPosition[1], true, Logic)
+    // mark sq around black king
+    markSquaresAroundKing(blackKingPosition[0], blackKingPosition[1], false, Logic)
+}
+
+function markSquaresAroundKing(row, col, isWhite, Logic){
     var kingDirections = getPieceAttackDirections(Pieces.WKing);
-    console.log("king directions: "+ kingDirections);
-    // mark white king's attacked squares
     for(var j=0;j<kingDirections.length;j++){
-        var attackColumn = whiteKingPosition[0] + kingDirections[j][0];
-        var attackRow = whiteKingPosition[1] + kingDirections[j][1];
+        var attackColumn = row + kingDirections[j][0];
+        var attackRow =col + kingDirections[j][1];
         if(attackColumn >= 0 && attackColumn < 8 && attackRow >= 0 && attackRow < 8){
-            if(attackedStateBlack[attackColumn][attackRow]){
-                board[0].prepend(createHighlightSquare(colors.BLUE,attackColumn+1,attackRow+1));
+            if(!isWhite && Logic["attackedStateWhite"][attackColumn][attackRow]){
+                Logic["boardElement"][0].prepend(createHighlightSquare(colors.BLUE,attackColumn+1,attackRow+1));
             }
-        }
-    }
-    // mark black king's attacked squares
-    for(var j=0;j<kingDirections.length;j++){
-        var attackColumn = blackKingPosition[0] + kingDirections[j][0];
-        var attackRow = blackKingPosition[1] + kingDirections[j][1];
-        
-        if(attackColumn >= 0 && attackColumn < 8 && attackRow >= 0 && attackRow < 8){
-            if(attackedStateWhite[attackColumn][attackRow]){
-                board[0].prepend(createHighlightSquare(colors.BLUE,attackColumn+1,attackRow+1));
+            else if(isWhite && Logic["attackedStateBlack"][attackColumn][attackRow]){
+                Logic["boardElement"][0].prepend(createHighlightSquare(colors.BLUE,attackColumn+1,attackRow+1));
             }
             
         }
@@ -291,25 +297,22 @@ function addKingHighlightsCheckbox(gameSettings){
 }
 // contains the main looping logic
 function mainLoop(gameSettings){
+   var Logic = {
+    boardElement: document.getElementsByClassName("board"),
+    boardState: makeArray(8,8),
+    attackedStateWhite: makeArray(8,8),
+    attackedStateBlack: makeArray(8,8)
+   }
 
-    // get the main board element
-    var board = document.getElementsByClassName("board");
-
-    // initialize board states to empty arrays
-    var boardState = makeArray(8,8);
-    var attackedStateWhite = makeArray(8,8);
-    var attackedStateBlack = makeArray(8,8)
-
-   
     // update where the pieces are on board
-    updateBoardState(boardState,attackedStateWhite,attackedStateBlack);
+    updateBoardState(Logic);
 
     // update of whether a square is attacked by a white or a black piece
-    updateAttackState(boardState, attackedStateWhite, attackedStateBlack);
+    updateAttackState(Logic);
     // if option is on, highlight kings' neighboring squares which are attacked by enemy pieces
-    if(gameSettings["kingHighlightsOn"]){highlightAttackedSquaresAroundKing(board, boardState, attackedStateWhite, attackedStateBlack);}
+    if(gameSettings["kingHighlightsOn"]){highlightAttackedSquaresAroundKing(Logic);}
 
-    if(VERBOSE) {console.table(attackedStateWhite); console.table(attackedStateBlack);}
+    if(VERBOSE) {console.table(Logic["attackedStateWhite"]); console.table(Logic["attackedStateBlack"]);}
     
 }
 
