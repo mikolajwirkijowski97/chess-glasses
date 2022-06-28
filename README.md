@@ -1,7 +1,7 @@
 # Chess-Glasses
 ## Extended visualization of the current board state on chess.com 
 
-## Aiming to Perform 0-depth visualization of what's happening on the board by reading it from the website into an array
+## Aiming to Perform 0-depth visualization of what's happening on the board by reading it from the chess.com and processing the data into digestible visualizations.
 ![alt text](https://github.com/mikolajwirkijowski97/chess-glasses/blob/master/icons/BoardSave.png)
 
 ## Roadmap
