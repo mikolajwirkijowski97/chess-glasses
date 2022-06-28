@@ -1,4 +1,4 @@
-# chess-glasses
+# Chess-Glasses
 ## Extended visualization of the current board state on chess.com 
 
 ## Aiming to Perform 0-depth visualization of what's happening on the board by reading it from the website into an array
@@ -6,7 +6,8 @@
 
 ## Roadmap
  * [x] King safety/mating visualization
- * [ ] Fix pawn/rook visualization bugs
+ * [x] Fix pawn/rook visualization bugs
+ * [ ] Square rule visualizer
  * [ ] Pin visualization
  * [ ] Integrate settings into chess.com UI
  * [ ] Show opponents most played openings
