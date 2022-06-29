@@ -1,4 +1,4 @@
-const VERBOSE = true;
+const VERBOSE = false;
 var addedElements = [];
 
 
@@ -43,7 +43,7 @@ function createHighlightSquare(color, row, column){
 }
 
 // clears all states and highlights
-function clearBoard(Logic){
+function clearBoard(Logic, clearHighlights=false){
     for(var x=0;x<Logic["boardState"].length;x++){
         for(var y=0; y< Logic["boardState"][x].length; y++){
             Logic["boardState"][x][y] = null;
@@ -52,15 +52,17 @@ function clearBoard(Logic){
 
     for(var x=0;x<Logic["attackedStateWhite"].length;x++){
         for(var y=0; y< Logic["attackedStateWhite"].length; y++){
-            Logic["attackedStateWhite"][x][y] = false;
+            Logic["attackedStateWhite"][x][y] = 0;
         }
     }
 
     for(var x=0;x<Logic["attackedStateBlack"].length;x++){
         for(var y=0; y< Logic["attackedStateBlack"][x].length; y++){
-            Logic["attackedStateBlack"][x][y] = false;
+            Logic["attackedStateBlack"][x][y] = 0;
         }
     }
+    // return from function here if highlights should not be cleared
+    if(!clearHighlights) return;
 
     for(var i=0;i<addedElements.length;i++){
         addedElements[i].remove();
@@ -99,7 +101,7 @@ function classToPiece(pieceClass){
 
 // Clears all pieces and highlights from the board and saves the client state of the chessboard into proper arrays.
 function updateBoardState(Logic){
-    clearBoard(Logic);
+    clearBoard(Logic, true);
     pieces = document.getElementsByClassName("piece");
     var squareXY = "";
     var pieceType = "";
@@ -159,14 +161,14 @@ function getPieceAttackDirections(piece){
     }
 }
 
-function markSquare(column, row, isWhite, Logic){
+function attackSquare(column, row, isWhite, Logic){
     if(isInBounds(column,row)){
         if(isWhite){
-            Logic["attackedStateWhite"][column][row] = true;
+            Logic["attackedStateWhite"][column][row] += 1;
         }
         else
         {
-            Logic["attackedStateBlack"][column][row] = true;
+            Logic["attackedStateBlack"][column][row] += 1;
         }
         
     }
@@ -181,6 +183,19 @@ function isSingleMovePiece(piece){
     || piece == Pieces.WKnight || piece == Pieces.BKnight || piece == Pieces.WKing || piece == Pieces.BKing;
 }
 
+function isSameDirection(a,b){
+    return a[0] == b[0] && a[1] == b[1];
+}
+// if a piece moves in that same direction, its attack count should add up with the piece behind it. 
+function attacksThatDirection(direction, piece){
+    if(piece == null) return false;
+    var pieceDirections = getPieceAttackDirections(piece);
+    for(var i=0; i<pieceDirections.length; i++){
+        if(isSameDirection(pieceDirections[i], direction)) return true;
+    }
+    return false;
+  
+}
 function attackSquares(column,row,Logic){
     var piece = Logic["boardState"][column][row]; 
     if(piece == null) return;
@@ -193,11 +208,12 @@ function attackSquares(column,row,Logic){
 
         while(true){
             if(isInBounds(attackColumn,attackRow)){
-                markSquare(attackColumn, attackRow, isWhite, Logic);
-                // if the square is non-empty(king excluded) OR its a single move piece, break the loop.
+                attackSquare(attackColumn, attackRow, isWhite, Logic);
+                // if the square is non-empty(king excluded) OR its a single move piece, break the loop. But dont break it if the piece moves in the same direction.
                 const isKing = Logic["boardState"][attackColumn][attackRow] == Pieces.WKing || Logic["boardState"][attackColumn][attackRow] == Pieces.BKing;
                 const isEmpty = Logic["boardState"][attackColumn][attackRow] == null;
-                if( (!isEmpty && !isKing) || isSingleMovePiece(piece)){
+                const attacksSameDirection = attacksThatDirection(attackDirections[i],Logic["boardState"][attackColumn][attackRow])
+                if( (!isEmpty && !isKing && !attacksSameDirection) || isSingleMovePiece(piece)){
                     break;
                 }
                 attackColumn += attackDirections[i][0];
@@ -274,13 +290,13 @@ function getUserGames(username){
 }
 
 // returns an array of size x by y
-    function makeArray(x,y){
+function makeArray(x,y){
         var newArr = new Array(8);
         for(var i=0;i<newArr.length;i++){
             newArr[i] = new Array(8);
         }
         return newArr;
-    }
+}
 
 function addCheckbox(gameSettings, settingHandle, checkBoxText, checked=false){
     var label = document.createElement("LABEL");
@@ -335,7 +351,7 @@ function highlightPinnedPieces(Logic){
                 attackedStateWhite: makeArray(8,8),
                 attackedStateBlack: makeArray(8,8)
             }; // temporary logic for calculation
-  
+            clearBoard(logicCopy);
             logicCopy["boardState"] = structuredClone(Logic["boardState"]);
             
             logicCopy["boardState"][col][row] = null;
@@ -361,11 +377,11 @@ function highlightHangingPieces(Logic){
             if(Logic["boardState"][col][row] == null || isKing) continue;
             
             //logic if white piece attacked and undefended or attacked and queen.
-            if(isWhite && Logic["attackedStateBlack"][col][row] && (!Logic["attackedStateWhite"][col][row] || isQueen)){
+            if(isWhite && Logic["attackedStateBlack"][col][row] > Logic["attackedStateWhite"][col][row]){
                 Logic["boardElement"][0].prepend(createHighlightSquare(colors.VIOLET,col+1,row+1));
                 continue;
             }
-            if(!isWhite && Logic["attackedStateWhite"][col][row] && (!Logic["attackedStateBlack"][col][row] || isQueen)){
+            if(!isWhite && Logic["attackedStateWhite"][col][row] > Logic["attackedStateBlack"][col][row]){
                 Logic["boardElement"][0].prepend(createHighlightSquare(colors.VIOLET,col+1,row+1));
                 continue;
             }
