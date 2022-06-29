@@ -302,9 +302,13 @@ function addKingHighlightsCheckbox(gameSettings){
 function highlightPinnedPieces(Logic){
     for(var col=0; col<8; col++){
         for(var row=0;row<8;row++){
+            const isWhite = Logic["boardState"][col][row]%2 == 0;
             const isKing = Logic["boardState"][col][row] == Pieces.WKing || Logic["boardState"][col][row] == Pieces.BKing;
 
-            if(Logic["boardState"][col][row] == null || isKing) continue;
+            var kingPos = getKingPosition(Logic, isWhite);
+            const kingAlreadyAttacked = isWhite ? Logic["attackedStateBlack"][kingPos[0]][kingPos[1]] : Logic["attackedStateWhite"][kingPos[0]][kingPos[1]];
+            if(Logic["boardState"][col][row] == null || isKing || kingAlreadyAttacked) continue;
+
             var logicCopy = {
                 boardState: makeArray(8,8),
                 attackedStateWhite: makeArray(8,8),
@@ -312,11 +316,11 @@ function highlightPinnedPieces(Logic){
             }; // temporary logic for calculation
   
             logicCopy["boardState"] = structuredClone(Logic["boardState"]);
-            var isWhite = logicCopy["boardState"][col][row]%2 == 0
+            
             logicCopy["boardState"][col][row] = null;
             updateAttackState(logicCopy);
             
-            var kingPos = getKingPosition(logicCopy, isWhite);
+            
             console.log("KING POSITION IS: ", kingPos[0],", ", kingPos[1] );
             if(logicCopy["attackedStateBlack"][kingPos[0]][kingPos[1]] && isWhite)  {
                 Logic["boardElement"][0].prepend(createHighlightSquare(colors.RED,col+1,row+1));
