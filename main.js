@@ -29,7 +29,7 @@ const colors = {
     "ORANGE":"(255,127,0)",
     "RED": "(0,0,255)"
 }
-
+// returns a highlight square and pushes it into the used elements global(to be changed) variable.
 function createHighlightSquare(color, row, column){
     var highlightsq = document.createElement("div");
     highlightsq.classList.add("highlight");
@@ -41,6 +41,7 @@ function createHighlightSquare(color, row, column){
     return highlightsq;
 }
 
+// clears all states and highlights
 function clearBoard(Logic){
     for(var x=0;x<Logic["boardState"].length;x++){
         for(var y=0; y< Logic["boardState"][x].length; y++){
@@ -65,7 +66,7 @@ function clearBoard(Logic){
     }
     addedElements.length = 0;
 }
-
+// maps the css piece classes to the Pieces enum
 function classToPiece(pieceClass){
     switch(pieceClass){
         case 'wp':
@@ -94,9 +95,10 @@ function classToPiece(pieceClass){
             return Pieces.BKing;
     }
 }
+
+// Clears all pieces and highlights from the board and saves the client state of the chessboard into proper arrays.
 function updateBoardState(Logic){
     clearBoard(Logic);
-
     pieces = document.getElementsByClassName("piece");
     var squareXY = "";
     var pieceType = "";
@@ -121,8 +123,7 @@ function updateBoardState(Logic){
         }
         catch(err){
             console.log(err);
-        }
-        
+        } 
     }
     
     if(VERBOSE)console.table(Logic["boardState"]);
@@ -203,11 +204,8 @@ function attackSquares(column,row,Logic){
             }
             else{break;}
             }
-        }
-    
+        } 
 }
-
-
 
 function updateAttackState(Logic){
     for(var x=0;x<Logic["boardState"].length;x++){
@@ -283,7 +281,27 @@ function getUserGames(username){
         return newArr;
     }
 
+function addCheckbox(gameSettings, settingHandle, checkBoxText){
+    var label = document.createElement("LABEL");
+    label.innerHTML = checkBoxText;
+    var khoCheckBox = document.createElement("INPUT");
+    khoCheckBox.setAttribute("type", "checkbox");
+    khoCheckBox.setAttribute("name",checkBoxText);
+    khoCheckBox.addEventListener('change', (event) => {
+        if (event.currentTarget.checked) {
+          gameSettings[settingHandle] = true;
+        } else {
+            gameSettings[settingHandle] = false;
+        }
+      });
+    var playerBottom = document.getElementById("board-layout-player-bottom");
+    label.append(khoCheckBox);
+    playerBottom.prepend(label);
+}
+
 function addKingHighlightsCheckbox(gameSettings){
+    var label = document.createElement("LABEL");
+    label.innerHTML = "King Highlights";
     var khoCheckBox = document.createElement("INPUT");
     khoCheckBox.setAttribute("type", "checkbox");
     khoCheckBox.setAttribute("name","king highlights");
@@ -296,7 +314,8 @@ function addKingHighlightsCheckbox(gameSettings){
       });
     
     var playerBottom = document.getElementById("board-layout-player-bottom");
-    playerBottom.prepend(khoCheckBox);
+    label.append(khoCheckBox);
+    playerBottom.prepend(label);
 }
 
 function highlightPinnedPieces(Logic){
@@ -319,9 +338,7 @@ function highlightPinnedPieces(Logic){
             
             logicCopy["boardState"][col][row] = null;
             updateAttackState(logicCopy);
-            
-            
-            console.log("KING POSITION IS: ", kingPos[0],", ", kingPos[1] );
+
             if(logicCopy["attackedStateBlack"][kingPos[0]][kingPos[1]] && isWhite)  {
                 Logic["boardElement"][0].prepend(createHighlightSquare(colors.RED,col+1,row+1));
             }
@@ -342,19 +359,15 @@ function mainLoop(gameSettings){
     attackedStateBlack: makeArray(8,8)
    }
 
-    // update where the pieces are on board
+    // update where the pieces are on board and clear previous states and highlights if they exist
     updateBoardState(Logic);
 
     // update of whether a square is attacked by a white or a black piece
     updateAttackState(Logic);
 
-    highlightPinnedPieces(Logic);
-
+    if(gameSettings["pinIndicationOn"]) { highlightPinnedPieces(Logic); }
+    if(gameSettings["kingHighlightsOn"]){ highlightAttackedSquaresAroundKing(Logic); }
     
-    // if option is on, highlight kings' neighboring squares which are attacked by enemy pieces
-    if(gameSettings["kingHighlightsOn"]){highlightAttackedSquaresAroundKing(Logic);}
-    
-
     if(VERBOSE) {console.table(Logic["attackedStateWhite"]); console.table(Logic["attackedStateBlack"]);}
     
 }
@@ -364,7 +377,8 @@ function main(){
         kingHighlightsOn : false,
         pinIndicationOn : false
     }
-    addKingHighlightsCheckbox(gameSettings);
+    addCheckbox(gameSettings, "kingHighlightsOn", "King Safety");
+    addCheckbox(gameSettings, "pinIndicationOn", "Pins");
     // run the main loop at set interval(in ms)
     setInterval(function () {mainLoop(gameSettings)}, 350);
 }
