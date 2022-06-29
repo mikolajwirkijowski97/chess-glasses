@@ -37,7 +37,7 @@ function createHighlightSquare(color, row, column){
     var classString = "square-"+row+column;
     
     highlightsq.classList.add(classString);
-    highlightsq.style = "background-color: rgb"+color+"; opacity: 0.4;";
+    highlightsq.style = "background-color: rgb"+color+"; opacity: 0.8;";
     this.addedElements.push(highlightsq);
     return highlightsq;
 }
