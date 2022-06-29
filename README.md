@@ -4,10 +4,11 @@ Aiming to Perform 0-depth visualization of what's happening on the board by read
 
 ## Roadmap
  * [x] King safety/mating visualization
+ * [ ] Hanging piece highlighting
  * [x] Fix pawn/rook visualization bugs
  * [ ] Square rule visualizer
- * [x] Pin visualization
- * [ ] Integrate settings into chess.com UI
+ * [x] Pin highlighting
+ * [x] Integrate settings into chess.com UI
  * [ ] Show opponents most played openings
  * [ ] Get more functionality ideas
 
