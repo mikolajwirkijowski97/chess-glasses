@@ -16,4 +16,8 @@
 
 ## King Safety/Mating helper example
 ![helper example 1](https://github.com/mikolajwirkijowski97/chess-glasses/blob/master/icons/BoardSave2.png)
+
+## Pinned piece highlighting example
+![pin example 1](https://github.com/mikolajwirkijowski97/chess-glasses/blob/master/icons/BoardSave3.png)
+
 ## I do not condone cheating, the helper is meant to help beginners during offline play or against friends who know beforehand that the game is tool assisted.
