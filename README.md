@@ -4,7 +4,7 @@ Aiming to Perform 0-depth visualization of what's happening on the board by read
 
 ## Roadmap
  * [x] King safety/mating visualization
- * [ ] Hanging piece highlighting
+ * [x] Undefended piece highlighting
  * [x] Fix pawn/rook visualization bugs
  * [ ] Square rule visualizer
  * [x] Pin highlighting
@@ -14,9 +14,13 @@ Aiming to Perform 0-depth visualization of what's happening on the board by read
 
 
 ## King Safety/Mating helper example
-![helper example 1](https://github.com/mikolajwirkijowski97/chess-glasses/blob/master/icons/BoardSave2.png)
+![helper example 1](https://github.com/mikolajwirkijowski97/chess-glasses/blob/master/examples/BoardSave2.png)
 
 ## Pinned piece highlighting example
-![pin example 1](https://github.com/mikolajwirkijowski97/chess-glasses/blob/master/icons/BoardSave3.png)
+![pin example 1](https://github.com/mikolajwirkijowski97/chess-glasses/blob/master/examples/BoardSave3.png)
+
+## Undefended piece highlighting example
+![undefended pieces example 1](https://github.com/mikolajwirkijowski97/chess-glasses/blob/master/examples/BoardSave3.png)
+
 
 ## I do not condone cheating, the helper is meant to help beginners during offline play or against friends who know beforehand that the game is tool assisted.
