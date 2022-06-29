@@ -26,17 +26,18 @@ const Pieces = {
 // define color strings
 const colors = {
     "BLUE":"(255,0,0)",
-    "ORANGE":"(255,127,0)"
+    "ORANGE":"(255,127,0)",
+    "RED": "(0,0,255)"
 }
 
-function createHighlightSquare(color, row, column, AddElements){
+function createHighlightSquare(color, row, column){
     var highlightsq = document.createElement("div");
     highlightsq.classList.add("highlight");
     var classString = "square-"+row+column;
     
     highlightsq.classList.add(classString);
     highlightsq.style = "background-color: rgb"+color+"; opacity: 0.4;";
-    addedElements.push(highlightsq);
+    this.addedElements.push(highlightsq);
     return highlightsq;
 }
 
@@ -178,8 +179,9 @@ function isSingleMovePiece(piece){
     || piece == Pieces.WKnight || piece == Pieces.BKnight || piece == Pieces.WKing || piece == Pieces.BKing;
 }
 
-function attackSquares(piece,column,row,Logic){
+function attackSquares(column,row,Logic){
     var piece = Logic["boardState"][column][row]; 
+    if(piece == null) return;
     var attackDirections = getPieceAttackDirections(piece);
     var isWhite = piece%2 == 0;
 
@@ -190,7 +192,6 @@ function attackSquares(piece,column,row,Logic){
         while(true){
             if(isInBounds(attackColumn,attackRow)){
                 markSquare(attackColumn, attackRow, isWhite, Logic);
-                
                 // if the square is non-empty(king excluded) OR its a single move piece, break the loop.
                 const isKing = Logic["boardState"][attackColumn][attackRow] == Pieces.WKing || Logic["boardState"][attackColumn][attackRow] == Pieces.BKing;
                 const isEmpty = Logic["boardState"][attackColumn][attackRow] == null;
@@ -206,11 +207,13 @@ function attackSquares(piece,column,row,Logic){
     
 }
 
+
+
 function updateAttackState(Logic){
     for(var x=0;x<Logic["boardState"].length;x++){
         for(var y=0; y< Logic["boardState"][x].length; y++){
             if(Logic["boardState"][x][y] != null){
-                attackSquares(Logic["boardState"][x][y],x,y,Logic);
+                attackSquares(x,y,Logic);
             }
         }
     }
@@ -295,6 +298,37 @@ function addKingHighlightsCheckbox(gameSettings){
     var playerBottom = document.getElementById("board-layout-player-bottom");
     playerBottom.prepend(khoCheckBox);
 }
+
+function highlightPinnedPieces(Logic){
+    for(var col=0; col<8; col++){
+        for(var row=0;row<8;row++){
+            const isKing = Logic["boardState"][col][row] == Pieces.WKing || Logic["boardState"][col][row] == Pieces.BKing;
+
+            if(Logic["boardState"][col][row] == null || isKing) continue;
+            var logicCopy = {
+                boardState: makeArray(8,8),
+                attackedStateWhite: makeArray(8,8),
+                attackedStateBlack: makeArray(8,8)
+            }; // temporary logic for calculation
+  
+            logicCopy["boardState"] = structuredClone(Logic["boardState"]);
+            var isWhite = logicCopy["boardState"][col][row]%2 == 0
+            logicCopy["boardState"][col][row] = null;
+            updateAttackState(logicCopy);
+            
+            var kingPos = getKingPosition(logicCopy, isWhite);
+            console.log("KING POSITION IS: ", kingPos[0],", ", kingPos[1] );
+            if(logicCopy["attackedStateBlack"][kingPos[0]][kingPos[1]] && isWhite)  {
+                Logic["boardElement"][0].prepend(createHighlightSquare(colors.RED,col+1,row+1));
+            }
+            if(logicCopy["attackedStateWhite"][kingPos[0]][kingPos[1]] && !isWhite){
+                Logic["boardElement"][0].prepend(createHighlightSquare(colors.RED,col+1,row+1));
+            }  
+
+        }
+    }
+}
+
 // contains the main looping logic
 function mainLoop(gameSettings){
    var Logic = {
@@ -309,8 +343,13 @@ function mainLoop(gameSettings){
 
     // update of whether a square is attacked by a white or a black piece
     updateAttackState(Logic);
+
+    highlightPinnedPieces(Logic);
+
+    
     // if option is on, highlight kings' neighboring squares which are attacked by enemy pieces
     if(gameSettings["kingHighlightsOn"]){highlightAttackedSquaresAroundKing(Logic);}
+    
 
     if(VERBOSE) {console.table(Logic["attackedStateWhite"]); console.table(Logic["attackedStateBlack"]);}
     
@@ -318,9 +357,9 @@ function mainLoop(gameSettings){
 
 function main(){
     var gameSettings = {
-        kingHighlightsOn : false
+        kingHighlightsOn : false,
+        pinIndicationOn : false
     }
-
     addKingHighlightsCheckbox(gameSettings);
     // run the main loop at set interval(in ms)
     setInterval(function () {mainLoop(gameSettings)}, 350);
