@@ -8,7 +8,7 @@
  * [x] King safety/mating visualization
  * [x] Fix pawn/rook visualization bugs
  * [ ] Square rule visualizer
- * [ ] Pin visualization
+ * [x] Pin visualization
  * [ ] Integrate settings into chess.com UI
  * [ ] Show opponents most played openings
  * [ ] Get more functionality ideas
