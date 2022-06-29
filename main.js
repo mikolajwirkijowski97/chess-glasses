@@ -27,7 +27,8 @@ const Pieces = {
 const colors = {
     "BLUE":"(255,0,0)",
     "ORANGE":"(255,127,0)",
-    "RED": "(0,0,255)"
+    "RED": "(0,0,255)",
+    "VIOLET": "(255,0,255)"
 }
 // returns a highlight square and pushes it into the used elements global(to be changed) variable.
 function createHighlightSquare(color, row, column){
@@ -281,11 +282,12 @@ function getUserGames(username){
         return newArr;
     }
 
-function addCheckbox(gameSettings, settingHandle, checkBoxText){
+function addCheckbox(gameSettings, settingHandle, checkBoxText, checked=false){
     var label = document.createElement("LABEL");
     label.innerHTML = checkBoxText;
     var khoCheckBox = document.createElement("INPUT");
     khoCheckBox.setAttribute("type", "checkbox");
+    if(checked) khoCheckBox.setAttribute("checked",true);
     khoCheckBox.setAttribute("name",checkBoxText);
     khoCheckBox.addEventListener('change', (event) => {
         if (event.currentTarget.checked) {
@@ -350,6 +352,28 @@ function highlightPinnedPieces(Logic){
     }
 }
 
+function highlightHangingPieces(Logic){
+    for(var col=0; col<8; col++){
+        for(var row=0;row<8;row++){
+            const isWhite = Logic["boardState"][col][row]%2 == 0;
+            const isKing = Logic["boardState"][col][row] == Pieces.WKing || Logic["boardState"][col][row] == Pieces.BKing;
+            const isQueen = Logic["boardState"][col][row] == Pieces.WQueen || Logic["boardState"][col][row] == Pieces.BQueen;
+            if(Logic["boardState"][col][row] == null || isKing) continue;
+            
+            //logic if white piece attacked and undefended or attacked and queen.
+            if(isWhite && Logic["attackedStateBlack"][col][row] && (!Logic["attackedStateWhite"][col][row] || isQueen)){
+                Logic["boardElement"][0].prepend(createHighlightSquare(colors.VIOLET,col+1,row+1));
+                continue;
+            }
+            if(!isWhite && Logic["attackedStateWhite"][col][row] && (!Logic["attackedStateBlack"][col][row] || isQueen)){
+                Logic["boardElement"][0].prepend(createHighlightSquare(colors.VIOLET,col+1,row+1));
+                continue;
+            }
+
+        }
+    }
+}
+
 // contains the main looping logic
 function mainLoop(gameSettings){
    var Logic = {
@@ -367,18 +391,21 @@ function mainLoop(gameSettings){
 
     if(gameSettings["pinIndicationOn"]) { highlightPinnedPieces(Logic); }
     if(gameSettings["kingHighlightsOn"]){ highlightAttackedSquaresAroundKing(Logic); }
-    
+    if(gameSettings["hangingPieceIndication"]){ highlightHangingPieces(Logic);}
+
     if(VERBOSE) {console.table(Logic["attackedStateWhite"]); console.table(Logic["attackedStateBlack"]);}
     
 }
 
 function main(){
     var gameSettings = {
+        hangingPieceIndication : true,
         kingHighlightsOn : false,
-        pinIndicationOn : false
+        pinIndicationOn : true
     }
-    addCheckbox(gameSettings, "kingHighlightsOn", "King Safety");
-    addCheckbox(gameSettings, "pinIndicationOn", "Pins");
+    addCheckbox(gameSettings, "kingHighlightsOn", "King safety");
+    addCheckbox(gameSettings, "pinIndicationOn", "Pins", true);
+    addCheckbox(gameSettings, "hangingPieceIndication", "Hanging pieces", true);
     // run the main loop at set interval(in ms)
     setInterval(function () {mainLoop(gameSettings)}, 350);
 }
