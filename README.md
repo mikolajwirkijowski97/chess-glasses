@@ -9,7 +9,7 @@ Aiming to Perform 0-depth visualization of what's happening on the board by read
  * [ ] Square rule visualizer
  * [x] Pin highlighting
  * [x] Integrate settings into chess.com UI
- * [x] Show opponents most played openings
+ * [x] Show opponents top 3 openings
  * [ ] Get more functionality ideas
 
 
