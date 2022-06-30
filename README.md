@@ -1,6 +1,6 @@
 # Chess-Glasses
 ## Extended visualization of the current board state on chess.com 
-Aiming to Perform 0-depth visualization of what's happening on the board by reading it from the chess.com and processing the data into digestible visualizations.
+Aiming to Perform 0-depth visualization of what's happening on the board by reading it from chess.com and processing the data into digestible visualizations.
 
 ## Roadmap
  * [x] King safety/mating visualization
