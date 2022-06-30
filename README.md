@@ -6,7 +6,6 @@ Aiming to Perform 0-depth visualization of what's happening on the board by read
  * [x] King safety/mating visualization
  * [x] Undefended piece highlighting
  * [x] Fix pawn/rook visualization bugs
- * [ ] Square rule visualizer
  * [x] Pin highlighting
  * [x] Integrate settings into chess.com UI
  * [x] Show opponents top 3 openings
